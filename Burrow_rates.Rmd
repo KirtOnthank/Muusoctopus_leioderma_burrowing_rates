@@ -1,0 +1,91 @@
+---
+title: "Muusoctopus leioderma burrowing rates"
+author: "Cheyne Springbett"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Load libraries
+```{r}
+library(googlesheets4)
+library(reshape2)
+library(nlme)
+library(car)
+```
+
+
+# Read in Sheets, combine keel dataset
+```{r reading in google sheets}
+sheetnames=sheet_names("https://docs.google.com/spreadsheets/d/1ckVjS4Jw9o_eg_l_TAwDFNp_evuu36sFHmXyUqT6YqA")
+evalnames=grep("Burrowing Rate", sheetnames, value=T)
+
+burrow=read_sheet("https://docs.google.com/spreadsheets/d/1ckVjS4Jw9o_eg_l_TAwDFNp_evuu36sFHmXyUqT6YqA", sheet=evalnames[1])
+
+for (i in 2:length(evalnames)){
+  burrow=rbind(
+    burrow,
+    read_sheet("https://docs.google.com/spreadsheets/d/1ckVjS4Jw9o_eg_l_TAwDFNp_evuu36sFHmXyUqT6YqA", sheet=evalnames[i])
+  )
+}
+burrow=data.frame(burrow)
+colnames(burrow)[2]="Mantle.Length"
+
+burrow=burrow[order(burrow$File.Name),]
+```
+
+
+```{r}
+
+weights=read_sheet("https://docs.google.com/spreadsheets/d/1ckVjS4Jw9o_eg_l_TAwDFNp_evuu36sFHmXyUqT6YqA",
+                   sheet=grep("Weight",sheetnames,value=T))
+colnames(weights)=c("octo","Mantle.Length","mass","comments")
+
+
+mass.lm=lm(mass~Mantle.Length,data=weights)
+summary(mass.lm)
+
+
+plot(mass~Mantle.Length,data=weights)
+abline(mass.lm)
+```
+
+
+```{r}
+burrow$mass=predict(mass.lm,newdata=data.frame(Mantle.Length=burrow$Mantle.Length))
+
+burrow$begin.seconds=(as.numeric(gsub("(\\d+):\\d+\\.\\d+","\\1",burrow$Begins.Burrow))*60)+as.numeric(gsub("\\d+:(\\d+\\.\\d+)","\\1",burrow$Begins.Burrow))
+
+burrow$end.seconds=(as.numeric(gsub("(\\d+):\\d+\\.\\d+","\\1",burrow$Finishes.Burrow))*60)+as.numeric(gsub("\\d+:(\\d+\\.\\d+)","\\1",burrow$Finishes.Burrow))
+
+```
+
+
+```{r}
+rates=cbind(
+  aggregate(mass~File.Name,data=burrow,FUN="mean"),
+  aggregate(mass~File.Name,data=burrow,FUN="sd")[,2],
+  aggregate(begin.seconds~File.Name,data=burrow,FUN="mean")[,2],
+  aggregate(begin.seconds~File.Name,data=burrow,FUN="sd")[,2],
+  aggregate(end.seconds~File.Name,data=burrow,FUN="mean")[,2],
+  aggregate(end.seconds~File.Name,data=burrow,FUN="sd")[,2]
+)
+colnames(rates)=c("filename","mass","mass_sd","begin","begin_sd","end","end_sd")
+```
+
+# Calculating burrowing rate index
+```{r}
+rates$bri=((rates$mass^(1/3))/(rates$end=rates$begin))*100
+```
+
+```{r}
+rates$Carly=burrow$Burrow.Type[burrow$Recording=="Carly"]
+rates$Garret=burrow$Burrow.Type[burrow$Recording=="Garrett"]
+rates$Katie=burrow$Burrow.Type[burrow$Recording=="Katie"]
+rates$Cheyne=burrow$Burrow.Type[burrow$Recording=="Cheyne"]
+```
+
+
+```{r}
+rates[rates$Cheyne=="Octopus-made",]
+```
+
