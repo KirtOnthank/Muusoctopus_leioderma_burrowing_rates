@@ -86,6 +86,13 @@ rates$Cheyne=burrow$Burrow.Type[burrow$Recording=="Cheyne"]
 
 
 ```{r}
-rates[rates$Cheyne=="Octopus-made",]
+burrowerrates= rates[rates$Cheyne=="Octopus-made",]
+```
+
+#mean bri
+
+```{r}
+mean(burrowerrates$bri)
+
 ```
 
