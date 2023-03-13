@@ -74,7 +74,10 @@ colnames(rates)=c("filename","mass","mass_sd","begin","begin_sd","end","end_sd")
 
 # Calculating burrowing rate index
 ```{r}
-rates$bri=((rates$mass^(1/3))/(rates$end=rates$begin))*100
+#rates$bri=((rates$mass^(1/3))/(rates$end=rates$begin))*100 #Original messed up equation
+
+rates$bri=((rates$mass^(1/3))/(rates$end-rates$begin))*100
+
 ```
 
 ```{r}
@@ -86,7 +89,7 @@ rates$Cheyne=burrow$Burrow.Type[burrow$Recording=="Cheyne"]
 
 
 ```{r}
-burrowerrates= rates[rates$Cheyne=="Octopus-made",]
+burrowerrates=rates[rates$Cheyne=="Octopus-made",]
 ```
 
 #mean bri
