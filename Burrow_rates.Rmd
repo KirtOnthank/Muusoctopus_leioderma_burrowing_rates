@@ -99,3 +99,9 @@ mean(burrowerrates$bri)
 
 ```
 
+#Getting range of Burrow times
+```{r}
+burrowtimes=(burrowerrates$end)-(burrowerrates$begin)
+burrowtimes
+```
+
