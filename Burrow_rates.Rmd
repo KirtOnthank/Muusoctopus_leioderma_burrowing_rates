@@ -47,8 +47,12 @@ summary(mass.lm)
 
 #Plot regression
 ```{r}
+svg(filename="Figure_10.svg")
+
 plot(mass~Mantle.Length,data=weights, ylab="Wet Weight (g)", xlab="Mantle Length (cm)")
 abline(mass.lm)
+
+dev.off()
 ```
 
 
