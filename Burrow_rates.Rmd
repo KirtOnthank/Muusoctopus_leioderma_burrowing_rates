@@ -43,11 +43,15 @@ colnames(weights)=c("octo","Mantle.Length","mass","comments")
 
 mass.lm=lm(mass~Mantle.Length,data=weights)
 summary(mass.lm)
+```
 
-
-plot(mass~Mantle.Length,data=weights)
+#Plot regression
+```{r}
+plot(mass~Mantle.Length,data=weights, ylab="Wet Weight (g)", xlab="Mantle Length (cm)")
 abline(mass.lm)
 ```
+
+
 
 
 ```{r}
